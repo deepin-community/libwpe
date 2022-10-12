@@ -1,0 +1,45 @@
+Source: libwpe
+Section: libs
+Priority: optional
+Maintainer: Debian WebKit Maintainers <pkg-webkit-maintainers@lists.alioth.debian.org>
+Uploaders: Alberto Garcia <berto@igalia.com>
+Build-Depends: debhelper-compat (= 12),
+               pkg-config,
+               libegl1-mesa-dev,
+               libxkbcommon-dev,
+               cmake
+Standards-Version: 4.5.1
+Rules-Requires-Root: no
+Vcs-Browser: https://salsa.debian.org/webkit-team/libwpe
+Vcs-Git: https://salsa.debian.org/webkit-team/libwpe.git
+Homepage: https://wpewebkit.org/
+
+Package: libwpe-1.0-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: libwpe-1.0-1 (= ${binary:Version}),
+         libxkbcommon-dev,
+         libegl1-mesa-dev,
+         ${misc:Depends}
+Description: Base library for the WPE WebKit port - development files
+ libwpe is a small C library designed for the WPE port of the WebKit
+ browser engine. This library defines platform-agnostic interfaces
+ that WPE WebKit uses to nest Web content presentation between the
+ platform-provided graphics system and the application-specific use
+ cases.
+ .
+ This package contains the development files.
+
+Package: libwpe-1.0-1
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Base library for the WPE WebKit port
+ libwpe is a small C library designed for the WPE port of the WebKit
+ browser engine. This library defines platform-agnostic interfaces
+ that WPE WebKit uses to nest Web content presentation between the
+ platform-provided graphics system and the application-specific use
+ cases.
+ .
+ This package contains the shared libraries.

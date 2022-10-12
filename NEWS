@@ -1,0 +1,103 @@
+===========================
+1.12.0 - September 30, 2021
+===========================
+
+- This release does not contain changes over the 1.11.1 development release.
+
+=======================
+1.11.1 - August 4, 2021
+=======================
+
+- New API to handle requests initiated by web content to (un)fullscreen web
+  views.
+- Support building on Windows.
+
+========================
+1.9.1 - January 18, 2021
+========================
+
+- Improve the Meson build system to allow using libwpe as a subproject.
+
+=====================
+1.7.1 - July 29, 2020
+=====================
+
+- New build configuration system based on Meson. The existing CMake-based
+  system is still maintained, and both produce the same outputs.
+- Hidden visibility is now used by default for symbols, and only those
+  belonging to the public API are exported.
+
+=====================
+1.3.1 - June 17, 2019
+=====================
+
+- Fix WebKit build issue due to usage of angle-bracketed includes, when
+  WPEBackend-fdo 1.3.1 is also installed.
+
+===================
+1.3.0 - May 8, 2019
+===================
+
+- New API to set the device scaling factor. Backends and WebKit embedders
+  can use this to e.g. support HiDPI displays.
+- New API to to obtain the root accessibility object for a view backend.
+- Fixed memory overallocation when setting pasteboard contents.
+
+=========================
+1.1.0 - December 13, 2018
+=========================
+
+- Support building libwpe on Windows.
+- New API for observing and setting the view backend state.
+- Added a new wpe_renderer_backend_egl_get_platform() function which can
+  be used to obtain a value which can be passed to eglGetPlatformDisplay()
+  and eglGetPlatformDisplayEXT().
+- Marked old function names containing the "backend" word as deprecated.
+  The symbols are still available, but it is encouraged to use the new
+  versions, e.g. prefer wpe_get_major_version() instead of
+  wpe_backend_get_major_version().
+- Marked function table struct parameters passed to some API functions
+  as "const".
+- Fixed headers so including <wpe-egl.h> results in <wpe.h> being included
+  automatically in the correct order.
+- Make instantiation of backends more robust by checking the validity of
+  interface pointers obtained from the backend.
+
+=======================
+1.0.0 - August 21, 2018
+=======================
+
+This release changes the API version to 0.2, and introduces the following
+changes and features:
+
+- The library is now called libwpe to avoid confusion. The WPEBackend name
+  used previously seemed to indicate that the library implemented a WPE
+  backend. The new libwpe name better reflects that it contains code needed
+  by the WPE WebKit port.
+- The libwpe library now uses the libtool versioning convention.
+- Handle conversion of keysyms to Unicode inside libwpe. This allowed to
+  remove he "unicode" member from keyboard event structs, and removing
+  wpe_input_key_mapper/wpe_input_key_mapper_interface.
+- New field in event structs to specify keyboard modifiers.
+- New API for keymap and composition handling based on libxkbcommon.
+
+
+====================
+0.2.0 - July 9, 2018
+====================
+
+This is a backwards-compatible release, which adds the following features:
+
+- New API to set and query the backend implementation library being used.
+- New API to query the version library, both with macros at build time,
+  and functions at runtime.
+- Trying to use a backend implementation library which does not provide
+  a "load_object" callback will produce a meaningful error instead of
+  silently failing.
+
+
+====================
+0.1 - April 26, 2018
+====================
+
+- Initial release
