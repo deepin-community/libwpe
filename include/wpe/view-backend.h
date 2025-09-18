@@ -53,6 +53,7 @@ struct wpe_view_backend;
 struct wpe_input_axis_event;
 struct wpe_input_keyboard_event;
 struct wpe_input_pointer_event;
+struct wpe_input_pointer_lock_event;
 struct wpe_input_touch_event;
 
 struct wpe_view_backend_client;
@@ -102,8 +103,8 @@ wpe_view_backend_set_input_client(struct wpe_view_backend*, const struct wpe_vie
 /**
  * wpe_view_backend_set_fullscreen_client:
  * @view_backend: (transfer none): The view backend to obtains events from.
- * @client: (transfer none): Client with callbacks for the events.
- * @userdata: (transfer none): User data passed to client callbacks.
+ * @client: (transfer none) (nullable): Client with callbacks for the events.
+ * @userdata: (transfer none) (nullable): User data passed to client callbacks.
  * 
  * Configure a @client with callbacks invoked for DOM fullscreen requests.
  * 
@@ -146,6 +147,37 @@ WPE_EXPORT
 void
 wpe_view_backend_set_fullscreen_handler(struct wpe_view_backend*, wpe_view_backend_fullscreen_handler handler, void* userdata);
 
+/**
+ * wpe_view_backend_pointer_lock_handler:
+ * @userdata: (transfer none): User data passed to the embedder.
+ * @enable: (transfer none): User data passed to the embedder.
+ *
+ * Type of functions used by an embedder to implement pointer lock in web views.
+ *
+ * Returns: a boolean indicating whether the operation was completed.
+ *
+ * Since: 1.14
+ */
+typedef bool (*wpe_view_backend_pointer_lock_handler)(void* userdata, bool enable);
+
+/**
+ * wpe_view_backend_set_pointer_lock_handler:
+ * @view_backend: (transfer none): The view backend to obtains events from.
+ * @handler: (transfer none): Function used by an embedder to implement pointer lock.
+ * @userdata: (transfer none): User data passed to the handler function.
+ *
+ * Handler function set by an embedder to implement pointer lock in web views.
+ *
+ * This function must be only used once for a given @view_backend, the handler
+ * cannot be changed once it has been set.
+ *
+ * Since: 1.14
+ */
+WPE_EXPORT
+void wpe_view_backend_set_pointer_lock_handler(struct wpe_view_backend*,
+                                               wpe_view_backend_pointer_lock_handler handler,
+                                               void*                                 userdata);
+
 WPE_EXPORT
 void
 wpe_view_backend_initialize(struct wpe_view_backend*);
@@ -166,9 +198,7 @@ struct wpe_view_backend_client {
     void (*activity_state_changed)(void*, uint32_t);
     void* (*get_accessible)(void*);
     void (*set_device_scale_factor)(void*, float);
-
-    /*< private >*/
-    void (*_wpe_reserved0)(void);
+    void (*target_refresh_rate_changed)(void*, uint32_t);
 };
 
 WPE_EXPORT
@@ -195,21 +225,50 @@ WPE_EXPORT
 void*
 wpe_view_backend_dispatch_get_accessible(struct wpe_view_backend* backend);
 
+/**
+ * wpe_view_backend_dispatch_set_device_scale_factor:
+ * @view_backend: (transfer none): The view backend to configure.
+ * @factor: Scaling factor to apply.
+ *
+ * Configure the device scaling factor applied to rendered content.
+ *
+ * Set the @factor by which sizes of content rendered to a web view will be
+ * multiplied by. The typical reason to set a value other than `1.0` (the
+ * default) is to produce output that will display at the intended physical
+ * size in displays with a high density of pixels.
+ *
+ * Only values from `0.05` up to `5.0` are allowed. Setting a value outside
+ * this range will be ignored, and in debug builds execution will be aborted.
+ *
+ * For example, a display that has a physical resolution of 3840x2160 with
+ * a scaling factor of `2.0` will make web content behave as if the screen
+ * had a size of 1920x1080, and content will be rendered at twice the size:
+ * each “logical” pixel will occupy four “physical” pixels (a 2x2 box) on
+ * the output.
+ *
+ * Since: 1.4
+ */
 WPE_EXPORT
 void
 wpe_view_backend_dispatch_set_device_scale_factor(struct wpe_view_backend*, float);
+
+WPE_EXPORT
+uint32_t wpe_view_backend_get_target_refresh_rate(struct wpe_view_backend*);
+
+WPE_EXPORT
+void wpe_view_backend_set_target_refresh_rate(struct wpe_view_backend*, uint32_t);
 
 struct wpe_view_backend_input_client {
     void (*handle_keyboard_event)(void*, struct wpe_input_keyboard_event*);
     void (*handle_pointer_event)(void*, struct wpe_input_pointer_event*);
     void (*handle_axis_event)(void*, struct wpe_input_axis_event*);
     void (*handle_touch_event)(void*, struct wpe_input_touch_event*);
+    void (*handle_pointer_lock_event)(void*, struct wpe_input_pointer_lock_event*);
 
     /*< private >*/
     void (*_wpe_reserved0)(void);
     void (*_wpe_reserved1)(void);
     void (*_wpe_reserved2)(void);
-    void (*_wpe_reserved3)(void);
 };
 
 WPE_EXPORT
@@ -227,6 +286,9 @@ wpe_view_backend_dispatch_axis_event(struct wpe_view_backend*, struct wpe_input_
 WPE_EXPORT
 void
 wpe_view_backend_dispatch_touch_event(struct wpe_view_backend*, struct wpe_input_touch_event*);
+
+WPE_EXPORT
+void wpe_view_backend_dispatch_pointer_lock_event(struct wpe_view_backend*, struct wpe_input_pointer_lock_event*);
 
 /**
  * wpe_view_backend_fullscreen_client:
@@ -318,6 +380,31 @@ WPE_EXPORT
 void
 wpe_view_backend_dispatch_request_exit_fullscreen(struct wpe_view_backend*);
 
+/**
+ * wpe_view_backend_request_pointer_lock:
+ * @view_backend: (transfer none): The view backend that triggered the event.
+ *
+ * Request the platform to lock the pointer.
+ *
+ * Returns: a boolean indicating whether the operation was completed.
+ *
+ * Since: 1.14
+ */
+WPE_EXPORT
+bool wpe_view_backend_request_pointer_lock(struct wpe_view_backend*);
+
+/**
+ * wpe_view_backend_request_pointer_unlock:
+ * @view_backend: (transfer none): The view backend that triggered the event.
+ *
+ * Request the platform to unlock the pointer.
+ *
+ * Returns: a boolean indicating whether the operation was completed.
+ *
+ * Since: 1.14
+ */
+WPE_EXPORT
+bool wpe_view_backend_request_pointer_unlock(struct wpe_view_backend*);
 
 #ifdef __cplusplus
 }

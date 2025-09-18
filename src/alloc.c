@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015, 2016 Igalia S.L.
+ * Copyright (C) 2022 Igalia S.L.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,39 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef wpe_view_backend_private_h
-#define wpe_view_backend_private_h
+#include "alloc-private.h"
 
-#include "../include/wpe/view-backend.h"
+#include <stdio.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-struct wpe_view_backend {
-    struct wpe_view_backend_base base;
-
-    const struct wpe_view_backend_client* backend_client;
-    void* backend_client_data;
-
-    const struct wpe_view_backend_input_client* input_client;
-    void* input_client_data;
-
-    const struct wpe_view_backend_fullscreen_client* fullscreen_client;
-    void* fullscreen_client_data;
-
-    wpe_view_backend_fullscreen_handler fullscreen_handler;
-    void* fullscreen_handler_data;
-
-    wpe_view_backend_pointer_lock_handler pointer_lock_handler;
-    void*                                 pointer_lock_handler_data;
-
-    uint32_t activity_state;
-    uint32_t refresh_rate;
-};
-
-#ifdef __cplusplus
+void
+wpe_alloc_fail(const char* file, unsigned line, size_t amount)
+{
+    fprintf(stderr, "%s:%u: failed to allocate %zu bytes\n", file, line, amount);
+    fflush(stderr);
+    abort();
 }
-#endif
-
-#endif // wpe_view_backend_private_h

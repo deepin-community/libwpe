@@ -1,10 +1,13 @@
 api_headers = [
 	'export.h',
+	'gamepad.h',
 	'input.h',
+	'input-xkb.h',
 	'keysyms.h',
 	'libwpe-version.h',
 	'loader.h',
 	'pasteboard.h',
+	'process.h',
 	'renderer-backend-egl.h',
 	'renderer-host.h',
 	'version.h',

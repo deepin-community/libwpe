@@ -1,1 +1,10 @@
-.pc/
+/CMakeCache.txt
+/CMakeFiles/
+/DerivedSources/
+/Makefile
+/build.ninja
+/compile_commands.json
+/*.cmake
+/lib*.so*
+/wpe-fdo/
+/wpe-*.pc

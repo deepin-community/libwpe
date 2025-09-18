@@ -1,3 +1,73 @@
+libwpe (1.16.2-2) unstable; urgency=medium
+
+  * debian/rules:
+    - Pass -DCMAKE_POLICY_VERSION_MINIMUM=3.5 to dh_auto_configure in
+      order to fix the build with CMake 4 (Closes: #1113224).
+  * debian/control:
+    - Update Standards-Version to 4.7.2 (no changes).
+
+ -- Alberto Garcia <berto@igalia.com>  Mon, 01 Sep 2025 10:41:01 +0200
+
+libwpe (1.16.2-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Alberto Garcia <berto@igalia.com>  Fri, 07 Feb 2025 11:02:44 +0100
+
+libwpe (1.16.1-1) unstable; urgency=medium
+
+  * New upstream release.
+  * debian/copyright:
+    - Update copyright years.
+  * debian/libwpe-1.0-1.symbols:
+    - Update symbols
+  * debian/control:
+    - Update Standards-Version to 4.7.0 (no changes).
+
+ -- Alberto Garcia <berto@igalia.com>  Tue, 21 Jan 2025 12:23:48 +0100
+
+libwpe (1.16.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * debian/libwpe-1.0-1.symbols:
+    - Update symbols
+  * debian/control:
+    - Replace pkg-config with pkgconf.
+
+ -- Alberto Garcia <berto@igalia.com>  Thu, 21 Mar 2024 17:53:03 +0100
+
+libwpe (1.14.2-1) unstable; urgency=medium
+
+  * New upstream release.
+  * debian/copyright:
+    - Update copyright years.
+  * debian/rules:
+    - Stop overriding dh_missing, --fail-missing is enabled by default
+      with debhelper compat 13.
+  * debian/control:
+    - Update Standards-Version to 4.6.2 (no changes).
+
+ -- Alberto Garcia <berto@igalia.com>  Thu, 25 Jan 2024 11:07:17 +0100
+
+libwpe (1.14.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * debian/libwpe-1.0-1.symbols:
+    - Update symbols
+
+ -- Alberto Garcia <berto@igalia.com>  Tue, 20 Sep 2022 11:28:43 +0200
+
+libwpe (1.12.2-1) unstable; urgency=medium
+
+  * New upstream release.
+  * debian/copyright:
+    - Update copyright years.
+  * debian/control:
+    - Set the debhelper compatibility level to 13.
+    - Update Standards-Version to 4.6.1.0 (no changes).
+
+ -- Alberto Garcia <berto@igalia.com>  Wed, 10 Aug 2022 15:10:04 +0200
+
 libwpe (1.12.0-1) unstable; urgency=medium
 
   * New upstream release.

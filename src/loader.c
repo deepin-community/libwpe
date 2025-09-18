@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015, 2016 Igalia S.L.
+ * Copyright (C) 2015, 2016, 2022 Igalia S.L.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,9 @@
 
 #include <dlfcn.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+
+#include "alloc-private.h"
 
 static void* s_impl_library = 0;
 static struct wpe_loader_interface* s_impl_loader = 0;
@@ -54,7 +55,7 @@ wpe_loader_set_impl_library_name(const char* impl_library_name)
         return;
 
     if (len > IMPL_LIBRARY_NAME_BUFFER_SIZE)
-        s_impl_library_name = (char *)malloc(len);
+        s_impl_library_name = wpe_malloc(len);
     else
         s_impl_library_name = s_impl_library_name_buffer;
     memcpy(s_impl_library_name, impl_library_name, len);

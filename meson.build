@@ -1,12 +1,12 @@
 project('libwpe', 'cpp', 'c',
-	meson_version: '>=0.49',
+	meson_version: '>=0.55',
 	default_options: [
 		'b_ndebug=if-release',
 		'c_std=c99',
 		'cpp_std=c++11',
 	],
 	license: 'BSD-2-Clause',
-	version: run_command(join_paths('scripts', 'version.py')).stdout().strip(),
+	version: run_command(join_paths('scripts', 'version.py'), check: true).stdout().strip(),
 )
 
 # This refers to the API level provided. This is modified only with major,
@@ -21,7 +21,7 @@ api_version = '1.0'
 # - If binary compatibility has been broken (eg removed or changed interfaces)
 #   change to [C+1, 0, 0]
 # - If the interface is the same as the previous version, use [C, R+1, A].
-soversion = [7, 0, 6]
+soversion = [10, 5, 9]
 
 # Mangle [C, R, A] into an actual usable *soversion*.
 soversion_major = soversion[0] - soversion[2]  # Current-Age
@@ -44,19 +44,13 @@ if default_backend != ''
 endif
 
 dependencies = []
+pkg_cflags = []
 
-#
-# Meson 0.55.0 is needed for "patch_directory" in .wrap files
-# and for the "allow_fallback" keyword in dependency() calls.
-#
-can_allow_fallback = meson.version().version_compare('>=0.55.0')
-
-if can_allow_fallback
+if get_option('enable-xkb')
+	pkg_cflags += ['-DWPE_ENABLE_XKB=1']
 	dependencies += dependency('xkbcommon',
 		fallback: ['libxkbcommon', 'libxkbcommon_dep'],
 	)
-else
-	dependencies += dependency('xkbcommon')
 endif
 
 cc = meson.get_compiler('c')
@@ -73,26 +67,33 @@ elif target_machine.system() != 'windows'
 endif
 
 if not cc.has_function('dlopen')
-	dl_dep = cc.find_library('dl', required: not can_allow_fallback)
-	if can_allow_fallback and not dl_dep.found()
-		dl_dep = dependency('dl', required: true,
+	dl_dep = cc.find_library('dl', required: false)
+	if not dl_dep.found()
+		dl_dep = dependency('dl',
 			allow_fallback: target_machine.system() == 'windows',
 		)
 	endif
 	dependencies += dl_dep
 endif
 
+if pkg_cflags.length() > 0
+	add_project_arguments(pkg_cflags, language: ['c', 'cpp'])
+endif
+
 libwpe = library('wpe-' + api_version,
-	'src/input.c',
+	'src/alloc.c',
+	'src/gamepad.c',
+	'src/input-xkb.c',
 	'src/key-unicode.c',
-	'src/loader.c',
 	'src/pasteboard.c',
 	'src/pasteboard-generic.cpp',
 	'src/pasteboard-noop.cpp',
+	'src/process.c',
 	'src/renderer-backend-egl.c',
 	'src/renderer-host.c',
 	'src/version.c',
 	'src/view-backend.c',
+	get_option('default_library') == 'shared' ? 'src/loader.c' : 'src/loader-static.c',
 	install: true,
 	dependencies: dependencies,
 	version: soversion,
@@ -108,6 +109,7 @@ import('pkgconfig').generate(
 	subdirs: 'wpe-' + api_version,
 	libraries: libwpe,
 	version: meson.project_version(),
+	extra_cflags: pkg_cflags,
 )
 
 if get_option('build-docs')

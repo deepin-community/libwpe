@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015, 2016 Igalia S.L.
+ * Copyright (C) 2015, 2016, 2022 Igalia S.L.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,14 @@
 
 #include "pasteboard-private.h"
 
-#include <cstdlib>
-#include <cstring>
 #include <map>
 #include <string>
+#include <cstring>
+
+// We need to include this header last, in order to avoid template expansions
+// from the C++ standard library happening after it forbids usage of the libc
+// memory functions.
+#include "alloc-private.h"
 
 namespace Generic {
 using Pasteboard = std::map<std::string, std::string>;
@@ -51,9 +55,10 @@ struct wpe_pasteboard_interface generic_pasteboard_interface = {
         if (!length)
             return;
 
-        out_vector->strings = static_cast<struct wpe_pasteboard_string*>(calloc(1, sizeof(struct wpe_pasteboard_string) * length));
+        out_vector->strings =
+            static_cast<struct wpe_pasteboard_string*>(wpe_calloc(length, sizeof(struct wpe_pasteboard_string)));
         out_vector->length = length;
-        memset(out_vector->strings, 0, out_vector->length);
+        memset(out_vector->strings, 0, sizeof(struct wpe_pasteboard_string) * length);
 
         uint64_t i = 0;
         for (auto& entry : pasteboard)

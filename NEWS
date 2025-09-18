@@ -1,8 +1,71 @@
-===========================
-1.12.0 - September 30, 2021
-===========================
+=========================
+1.16.2 - February 6, 2025
+=========================
 
-- This release does not contain changes over the 1.11.1 development release.
+- Fix ABI break accidentally introduced in the 1.16.2 release.
+
+=========================
+1.16.1 - January 21, 2025
+=========================
+
+- Add support for non-discrete gamepad button values. This allows
+  representing button pressure sensitivity for devices with analog
+  button inputs.
+
+=======================
+1.16.0 - March 21, 2024
+=======================
+
+- This version does not contain changes over the 1.15.2 development release.
+
+=========================
+1.15.2 - January 25, 2024
+=========================
+
+- Allow resetting the fullscreen client to a null pointer.
+- Fix usage of the _wpe_loader_interface with the static loader.
+
+====================
+1.15.1 - May 8, 2023
+====================
+
+- New API to override the default to override the default implementation
+  for subprocess launch and termination.
+- New API for handling pointer lock events.
+- Fix build failures with certain C library versions.
+- Properly handle the EGL library when available without a pkg-config
+  module file present.
+
+========================
+1.13.3 - August 11, 2022
+========================
+
+- Modify the gamepad API to pass the wpe_gamepad_provider when creating
+  new gamepad instances, and the associated wpe_gamepad_provider_get_backend()
+  accessor.
+- Restrict the range of values allowed for the device scaling factor, which
+  prevents both divisions by zero and impossibly big graphics buffers.
+- Fix pasteboard to use the generic interface by default.
+- Fix memory allocation to always abort execution on failure.
+
+=====================
+1.13.2 - May 16, 2022
+=====================
+
+- New API to configure the target refresh rate of view backends.
+
+=====================
+1.13.1 - May 12, 2022
+=====================
+
+- New API to provide input events to be treated by WebKit as gamepad inputs.
+- New WPE_ENABLE_XKB build option, enabled by default, which can be used to
+  completely avoid usage of libxkbcommon.
+- Allow libwpe to be built as a static library. The rest of the code
+  linked with the static library must provide the _wpe_loader_interface
+  symbol, as dlopen() will not be used.
+- Allow building libwpe within a larger CMake project.
+- Update the required Meson version to 0.55.0
 
 =======================
 1.11.1 - August 4, 2021

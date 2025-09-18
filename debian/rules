@@ -5,5 +5,6 @@ export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 %:
 	dh $@
 
-override_dh_missing:
-	dh_missing --fail-missing
+# Fix build with CMake 4, see #1113224
+override_dh_auto_configure:
+	dh_auto_configure -- -DCMAKE_POLICY_VERSION_MINIMUM=3.5

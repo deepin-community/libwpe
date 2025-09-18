@@ -3,12 +3,12 @@ Section: libs
 Priority: optional
 Maintainer: Debian WebKit Maintainers <pkg-webkit-maintainers@lists.alioth.debian.org>
 Uploaders: Alberto Garcia <berto@igalia.com>
-Build-Depends: debhelper-compat (= 12),
-               pkg-config,
+Build-Depends: debhelper-compat (= 13),
+               pkgconf,
                libegl1-mesa-dev,
                libxkbcommon-dev,
                cmake
-Standards-Version: 4.5.1
+Standards-Version: 4.7.2
 Rules-Requires-Root: no
 Vcs-Browser: https://salsa.debian.org/webkit-team/libwpe
 Vcs-Git: https://salsa.debian.org/webkit-team/libwpe.git
