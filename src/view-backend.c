@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015, 2016 Igalia S.L.
+ * Copyright (C) 2015, 2016, 2022 Igalia S.L.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,7 @@
 
 #include "view-backend-private.h"
 
+#include "alloc-private.h"
 #include "loader-private.h"
 #include <assert.h>
 #include <stdlib.h>
@@ -44,9 +45,7 @@ wpe_view_backend_create()
 struct wpe_view_backend*
 wpe_view_backend_create_with_backend_interface(struct wpe_view_backend_interface* interface, void* interface_user_data)
 {
-    struct wpe_view_backend* backend = calloc(1, sizeof(struct wpe_view_backend));
-    if (!backend)
-        return 0;
+    struct wpe_view_backend* backend = wpe_calloc(1, sizeof(struct wpe_view_backend));
 
     backend->base.interface = interface;
     backend->base.interface_data = backend->base.interface->create(interface_user_data, backend);
@@ -69,9 +68,13 @@ wpe_view_backend_destroy(struct wpe_view_backend* backend)
     backend->fullscreen_client = NULL;
     backend->fullscreen_client_data = NULL;
 
-    backend->activity_state = 0;
+    backend->pointer_lock_handler = NULL;
+    backend->pointer_lock_handler_data = NULL;
 
-    free(backend);
+    backend->activity_state = 0;
+    backend->refresh_rate = 0;
+
+    wpe_free(backend);
 }
 
 static void
@@ -100,8 +103,6 @@ wpe_view_backend_set_input_client(struct wpe_view_backend* backend, const struct
 void
 wpe_view_backend_set_fullscreen_client(struct wpe_view_backend* backend, const struct wpe_view_backend_fullscreen_client* client, void* client_data)
 {
-    assert(!backend->fullscreen_client);
-
     backend->fullscreen_client = client;
     backend->fullscreen_client_data = client_data;
 }
@@ -169,8 +170,29 @@ wpe_view_backend_dispatch_get_accessible(struct wpe_view_backend* backend)
 void
 wpe_view_backend_dispatch_set_device_scale_factor(struct wpe_view_backend* backend, float scale)
 {
+    if (scale < 0.05f || scale > 5.0f) {
+        assert(!"Scale factor not in the [0.05, 5.0] range");
+        return;
+    }
+
     if (backend->backend_client && backend->backend_client->set_device_scale_factor)
         backend->backend_client->set_device_scale_factor(backend->backend_client_data, scale);
+}
+
+void
+wpe_view_backend_set_target_refresh_rate(struct wpe_view_backend* backend, uint32_t rate)
+{
+    if (backend->refresh_rate != rate) {
+        backend->refresh_rate = rate;
+        if (backend->backend_client && backend->backend_client->target_refresh_rate_changed)
+            backend->backend_client->target_refresh_rate_changed(backend->backend_client_data, backend->refresh_rate);
+    }
+}
+
+uint32_t
+wpe_view_backend_get_target_refresh_rate(struct wpe_view_backend* backend)
+{
+    return backend->refresh_rate;
 }
 
 void
@@ -185,6 +207,14 @@ wpe_view_backend_dispatch_pointer_event(struct wpe_view_backend* backend, struct
 {
     if (backend->input_client)
         backend->input_client->handle_pointer_event(backend->input_client_data, event);
+}
+
+void
+wpe_view_backend_dispatch_pointer_lock_event(struct wpe_view_backend*             backend,
+                                             struct wpe_input_pointer_lock_event* event)
+{
+    if (backend->input_client)
+        backend->input_client->handle_pointer_lock_event(backend->input_client_data, event);
 }
 
 void
@@ -244,4 +274,31 @@ wpe_view_backend_dispatch_request_exit_fullscreen(struct wpe_view_backend* backe
 {
     if (backend->fullscreen_client)
         backend->fullscreen_client->request_exit_fullscreen(backend->fullscreen_client_data);
+}
+
+void
+wpe_view_backend_set_pointer_lock_handler(struct wpe_view_backend*              backend,
+                                          wpe_view_backend_pointer_lock_handler handler,
+                                          void*                                 userdata)
+{
+    assert(!backend->pointer_lock_handler);
+
+    backend->pointer_lock_handler = handler;
+    backend->pointer_lock_handler_data = userdata;
+}
+
+bool
+wpe_view_backend_request_pointer_lock(struct wpe_view_backend* backend)
+{
+    if (backend->pointer_lock_handler)
+        return backend->pointer_lock_handler(backend->pointer_lock_handler_data, true);
+    return false;
+}
+
+bool
+wpe_view_backend_request_pointer_unlock(struct wpe_view_backend* backend)
+{
+    if (backend->pointer_lock_handler)
+        return backend->pointer_lock_handler(backend->pointer_lock_handler_data, false);
+    return false;
 }

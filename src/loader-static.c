@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015, 2016 Igalia S.L.
+ * Copyright (C) 2022 Igalia S.L.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,39 +24,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef wpe_view_backend_private_h
-#define wpe_view_backend_private_h
+#include "loader-private.h"
 
-#include "../include/wpe/view-backend.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+extern struct wpe_loader_interface _wpe_loader_interface;
 
-struct wpe_view_backend {
-    struct wpe_view_backend_base base;
-
-    const struct wpe_view_backend_client* backend_client;
-    void* backend_client_data;
-
-    const struct wpe_view_backend_input_client* input_client;
-    void* input_client_data;
-
-    const struct wpe_view_backend_fullscreen_client* fullscreen_client;
-    void* fullscreen_client_data;
-
-    wpe_view_backend_fullscreen_handler fullscreen_handler;
-    void* fullscreen_handler_data;
-
-    wpe_view_backend_pointer_lock_handler pointer_lock_handler;
-    void*                                 pointer_lock_handler_data;
-
-    uint32_t activity_state;
-    uint32_t refresh_rate;
-};
-
-#ifdef __cplusplus
+bool
+wpe_loader_init(const char* impl_library_name)
+{
+    return true;
 }
-#endif
 
-#endif // wpe_view_backend_private_h
+const char*
+wpe_loader_get_loaded_implementation_library_name(void)
+{
+#ifdef WPE_BACKEND
+    return WPE_BACKEND;
+#else
+    return NULL;
+#endif
+}
+
+void*
+wpe_load_object(const char* object_name)
+{
+    if (!_wpe_loader_interface.load_object) {
+        fprintf(stderr,
+                "wpe_load_object: failed to load object with name '%s': backend doesn't implement load_object vfunc\n",
+                object_name);
+        abort();
+    }
+    return _wpe_loader_interface.load_object(object_name);
+}

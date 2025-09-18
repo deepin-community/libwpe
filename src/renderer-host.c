@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015, 2016 Igalia S.L.
+ * Copyright (C) 2015, 2016, 2022 Igalia S.L.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,18 +26,15 @@
 
 #include "renderer-host-private.h"
 
+#include "alloc-private.h"
 #include "loader-private.h"
-#include <stdlib.h>
 
 int
 wpe_renderer_host_create_client()
 {
     static struct wpe_renderer_host* s_renderer_host = 0;
     if (!s_renderer_host) {
-        s_renderer_host = calloc(1, sizeof(struct wpe_renderer_host));
-        if (!s_renderer_host)
-            return -1;
-
+        s_renderer_host = wpe_calloc(1, sizeof(struct wpe_renderer_host));
         s_renderer_host->base.interface = wpe_load_object("_wpe_renderer_host_interface");
         s_renderer_host->base.interface_data = s_renderer_host->base.interface->create();
 
